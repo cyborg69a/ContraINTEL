@@ -4,17 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ContraINTEL - Analista</title>
+  <link rel="stylesheet" href="styles/main.css" />
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     const supabase = createClient('https://TU-PROYECTO.supabase.co', 'TU-CLAVE-ANON')
 
     const tabla = document.getElementById('tabla-reportes')
+    const logoutBtn = document.getElementById('logout-btn')
 
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.href = 'index.html'
+    })
+
+    // Cargar todos los reportes
     async function cargarReportes() {
-      const { data, error } = await supabase
-        .from('reportes')
-        .select('*')
+      const { data, error } = await supabase.from('reportes').select('*')
 
       if (error) {
         alert('Error al cargar reportes: ' + error.message)
@@ -38,11 +45,12 @@
         </tr>
       `).join('')
 
-      // Escuchar cambios de estado
+      // Detectar cambios de estado
       document.querySelectorAll('.estado-select').forEach(select => {
         select.addEventListener('change', async (e) => {
           const id = e.target.getAttribute('data-id')
           const nuevoEstado = e.target.value
+
           const { error } = await supabase
             .from('reportes')
             .update({ estado: nuevoEstado })
@@ -61,12 +69,27 @@
   </script>
 </head>
 <body>
-  <h1>Panel de Analista</h1>
-  <table border="1">
-    <thead>
-      <tr><th>Título</th><th>Severidad</th><th>Descripción</th><th>Estado</th><th>Fecha</th></tr>
-    </thead>
-    <tbody id="tabla-reportes"></tbody>
-  </table>
+  <header>
+    <h1>ContraINTEL</h1>
+    <p>Panel del Analista</p>
+  </header>
+
+  <main>
+    <button id="logout-btn">Cerrar sesión</button>
+
+    <h2>Lista de Reportes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Severidad</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-reportes"></tbody>
+    </table>
+  </main>
 </body>
 </html>
