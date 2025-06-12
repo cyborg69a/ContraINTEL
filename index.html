@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContraINTEL - Acceso</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <script type="module" src="scripts/auth.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>ContraINTEL</h1>
+    <p>Plataforma de Reporte de Incidentes y Análisis CTI</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Registro</h2>
+      <form id="register-form">
+        <input type="email" id="register-email" placeholder="Correo" required>
+        <input type="password" id="register-password" placeholder="Contraseña" required>
+        <select id="register-role" required>
+          <option value="">Selecciona tu rol</option>
+          <option value="reportante">Reportante</option>
+          <option value="analista">Analista</option>
+        </select>
+        <button type="submit">Registrarse</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Iniciar sesión</h2>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="Correo" required>
+        <input type="password" id="login-password" placeholder="Contraseña" required>
+        <button type="submit">Ingresar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
