@@ -15,30 +15,56 @@
     const tabla = document.getElementById('tabla-reportes')
     const logoutBtn = document.getElementById('logout-btn')
 
-    // Logout
     logoutBtn.addEventListener('click', async () => {
       await supabase.auth.signOut()
       window.location.href = 'index.html'
     })
 
-    // Enviar reporte
+    // Calcular hash SHA-256
+    async function calcularHash(file) {
+      const arrayBuffer = await file.arrayBuffer()
+      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
 
       const titulo = form.titulo.value
       const descripcion = form.descripcion.value
       const severidad = form.severidad.value
+      const archivo = document.getElementById('archivo').files[0]
+      let archivoHash = null
+
+      if (archivo) {
+        archivoHash = await calcularHash(archivo)
+
+        const nombreArchivo = `${user.id}/${archivo.name}`
+        const { error: uploadError } = await supabase.storage
+          .from('reportes')
+          .upload(nombreArchivo, archivo, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          alert('Error al subir el archivo: ' + uploadError.message)
+          return
+        }
+      }
 
       const { error } = await supabase.from('reportes').insert({
         titulo,
         descripcion,
         severidad,
         creado_por: user.id,
-        estado: 'Nuevo'
+        estado: 'Nuevo',
+        archivo_hash: archivoHash
       })
 
       if (error) {
-        alert('Error al enviar: ' + error.message)
+        alert('Error al guardar reporte: ' + error.message)
       } else {
         alert('Reporte enviado')
         form.reset()
@@ -46,7 +72,6 @@
       }
     })
 
-    // Cargar reportes del usuario
     async function cargarReportes() {
       const { data, error } = await supabase
         .from('reportes')
@@ -90,6 +115,7 @@
         <option value="Media">Media</option>
         <option value="Baja">Baja</option>
       </select>
+      <input type="file" id="archivo" name="archivo" />
       <button type="submit">Enviar Reporte</button>
     </form>
 
