@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContraINTEL - Reportante</title>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    const supabase = createClient('https://TU-PROYECTO.supabase.co', 'TU-CLAVE-ANON')
+
+    const user = (await supabase.auth.getUser()).data.user
+    const form = document.getElementById('reporte-form')
+    const tabla = document.getElementById('tabla-reportes')
+
+    // Enviar reporte
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const titulo = form.titulo.value
+      const descripcion = form.descripcion.value
+      const severidad = form.severidad.value
+
+      const { error } = await supabase.from('reportes').insert({
+        titulo,
+        descripcion,
+        severidad,
+        creado_por: user.id,
+        estado: 'Nuevo'
+      })
+
+      if (error) {
+        alert('Error al enviar: ' + error.message)
+      } else {
+        alert('Reporte enviado')
+        form.reset()
+        cargarReportes()
+      }
+    })
+
+    // Cargar reportes del usuario
+    async function cargarReportes() {
+      const { data, error } = await supabase
+        .from('reportes')
+        .select('*')
+        .eq('creado_por', user.id)
+
+      if (error) {
+        console.error(error)
+        return
+      }
+
+      tabla.innerHTML = data.map(r => `
+        <tr>
+          <td>${r.titulo}</td>
+          <td>${r.severidad}</td>
+          <td>${r.estado}</td>
+          <td>${new Date(r.fecha_creacion || r.created_at).toLocaleString()}</td>
+        </tr>
+      `).join('')
+    }
+
+    cargarReportes()
+  </script>
+</head>
+<body>
+  <h1>Bienvenido, Reportante</h1>
+
+  <h2>Nuevo Reporte</h2>
+  <form id="reporte-form">
+    <input type="text" name="titulo" placeholder="Título" required />
+    <textarea name="descripcion" placeholder="Describe el incidente" required></textarea>
+    <select name="severidad" required>
+      <option value="Alta">Alta</option>
+      <option value="Media">Media</option>
+      <option value="Baja">Baja</option>
+    </select>
+    <button type="submit">Enviar Reporte</button>
+  </form>
+
+  <h2>Mis Reportes</h2>
+  <table border="1">
+    <thead>
+      <tr><th>Título</th><th>Severidad</th><th>Estado</th><th>Fecha</th></tr>
+    </thead>
+    <tbody id="tabla-reportes"></tbody>
+  </table>
+</body>
+</html>
