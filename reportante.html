@@ -4,14 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ContraINTEL - Reportante</title>
+  <link rel="stylesheet" href="styles/main.css" />
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabase = createClient('https://TU-PROYECTO.supabase.co', 'TU-CLAVE-ANON')
+    const supabase = createClient('https://vjiohcqyxasxhdvrywlv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqaW9oY3F5eGFzeGhkdnJ5d2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQ4OTgsImV4cCI6MjA2NTM0MDg5OH0.O8hPp9RO4t6vXRUaf2Jz-Xxvpb0B8m6bsUPczH-nj70')
 
     const user = (await supabase.auth.getUser()).data.user
     const form = document.getElementById('reporte-form')
     const tabla = document.getElementById('tabla-reportes')
+    const logoutBtn = document.getElementById('logout-btn')
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      window.location.href = 'index.html'
+    })
 
     // Enviar reporte
     form.addEventListener('submit', async (e) => {
@@ -64,26 +72,39 @@
   </script>
 </head>
 <body>
-  <h1>Bienvenido, Reportante</h1>
+  <header>
+    <h1>ContraINTEL</h1>
+    <p>Panel del Reportante</p>
+  </header>
 
-  <h2>Nuevo Reporte</h2>
-  <form id="reporte-form">
-    <input type="text" name="titulo" placeholder="Título" required />
-    <textarea name="descripcion" placeholder="Describe el incidente" required></textarea>
-    <select name="severidad" required>
-      <option value="Alta">Alta</option>
-      <option value="Media">Media</option>
-      <option value="Baja">Baja</option>
-    </select>
-    <button type="submit">Enviar Reporte</button>
-  </form>
+  <main>
+    <button id="logout-btn">Cerrar sesión</button>
 
-  <h2>Mis Reportes</h2>
-  <table border="1">
-    <thead>
-      <tr><th>Título</th><th>Severidad</th><th>Estado</th><th>Fecha</th></tr>
-    </thead>
-    <tbody id="tabla-reportes"></tbody>
-  </table>
+    <h2>Nuevo Reporte</h2>
+    <form id="reporte-form">
+      <input type="text" name="titulo" placeholder="Título del incidente" required />
+      <textarea name="descripcion" placeholder="Describe el incidente" required></textarea>
+      <select name="severidad" required>
+        <option value="">Selecciona severidad</option>
+        <option value="Alta">Alta</option>
+        <option value="Media">Media</option>
+        <option value="Baja">Baja</option>
+      </select>
+      <button type="submit">Enviar Reporte</button>
+    </form>
+
+    <h2>Mis Reportes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Severidad</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-reportes"></tbody>
+    </table>
+  </main>
 </body>
 </html>
