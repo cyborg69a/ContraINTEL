@@ -18,25 +18,6 @@
       window.location.href = 'index.html'
     })
 
-    async function descargarArchivo(ruta) {
-      const { data, error } = await supabase
-        .storage
-        .from('reportes')
-        .download(ruta)
-
-      if (error) {
-        alert('Error al descargar: ' + error.message)
-        return
-      }
-
-      const url = URL.createObjectURL(data)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = ruta.split('/').pop()
-      a.click()
-      URL.revokeObjectURL(url)
-    }
-
     async function cargarReportes() {
       const { data, error } = await supabase.from('reportes').select('*')
 
@@ -64,13 +45,39 @@
             <td>${new Date(r.fecha_creacion || r.created_at).toLocaleString()}</td>
             <td>
               ${r.archivo_nombre
-                ? `<button onclick="descargarArchivo('${r.archivo_nombre}')">Descargar</button>`
+                ? `<button class="descargar-btn" data-ruta="${r.archivo_nombre}">Descargar</button>`
                 : '—'}
             </td>
           </tr>
         `
       }
 
+      // Manejadores para botones de descarga
+      document.querySelectorAll('.descargar-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const ruta = e.target.getAttribute('data-ruta')
+          if (!ruta) return
+
+          const { data, error } = await supabase
+            .storage
+            .from('reportes')
+            .download(ruta)
+
+          if (error) {
+            alert('Error al descargar: ' + error.message)
+            return
+          }
+
+          const url = URL.createObjectURL(data)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = ruta.split('/').pop()
+          a.click()
+          URL.revokeObjectURL(url)
+        })
+      })
+
+      // Manejadores para cambiar estado
       document.querySelectorAll('.estado-select').forEach(select => {
         select.addEventListener('change', async (e) => {
           const id = e.target.getAttribute('data-id')
