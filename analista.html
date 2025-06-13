@@ -2,31 +2,48 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ContraINTEL - Analista</title>
   <link rel="stylesheet" href="styles/main.css" />
+  <!-- zip.js para generar ZIP con contraseña -->
+  <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.26/dist/zip-full.min.js"></script>
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    const supabase = createClient('https://vjiohcqyxasxhdvrywlv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqaW9oY3F5eGFzeGhkdnJ5d2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQ4OTgsImV4cCI6MjA2NTM0MDg5OH0.O8hPp9RO4t6vXRUaf2Jz-Xxvpb0B8m6bsUPczH-nj70')
+    const supabase = createClient('https://vjiohcqyxasxhdvrywlv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqaW9oY3F5eGFzeGhkdnJ5d2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQ4OTgsImV4cCI6MjA2NTM0MDg5OH0.O8hPp9RO4t6vXRUaf2Jz-Xxvpb0B8m6bsUPczH-nj70');
 
-    const tabla = document.getElementById('tabla-reportes')
-    const logoutBtn = document.getElementById('logout-btn')
+    const tabla = document.getElementById('tabla-reportes');
+    const logoutBtn = document.getElementById('logout-btn');
 
     logoutBtn.addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      window.location.href = 'index.html'
-    })
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
+    });
+
+    async function descargarZipProtegido(nombreArchivo, contenidoBlob) {
+      const writer = new zip.ZipWriter(new zip.BlobWriter("application/zip"), {
+        password: "ContraINTEL2025"
+      });
+      await writer.add(nombreArchivo.split("/").pop(), new zip.BlobReader(contenidoBlob));
+      const zipBlob = await writer.close();
+
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte-${nombreArchivo.split("/").pop()}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
 
     async function cargarReportes() {
-      const { data, error } = await supabase.from('reportes').select('*')
+      const { data, error } = await supabase.from('reportes').select('*');
 
       if (error) {
-        alert('Error al cargar reportes: ' + error.message)
-        return
+        alert('Error al cargar reportes: ' + error.message);
+        return;
       }
 
-      tabla.innerHTML = ''
+      tabla.innerHTML = '';
 
       for (const r of data) {
         tabla.innerHTML += `
@@ -49,55 +66,50 @@
                 : '—'}
             </td>
           </tr>
-        `
+        `;
       }
 
-      // Botones de descarga
+      // Botones de descarga con zip protegido
       document.querySelectorAll('.descargar-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
-          const ruta = e.target.getAttribute('data-ruta')
-          if (!ruta) return
+          const ruta = e.target.getAttribute('data-ruta');
+          if (!ruta) return;
 
           const { data, error } = await supabase
             .storage
             .from('reportes')
-            .download(ruta)
+            .download(ruta);
 
           if (error) {
-            alert('Error al descargar: ' + error.message)
-            return
+            alert('Error al descargar: ' + error.message);
+            return;
           }
 
-          const url = URL.createObjectURL(data)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = ruta.split('/').pop()
-          a.click()
-          URL.revokeObjectURL(url)
-        })
-      })
+          await descargarZipProtegido(ruta, data);
+        });
+      });
 
-      // Cambiar estado
+      // Cambio de estado
       document.querySelectorAll('.estado-select').forEach(select => {
         select.addEventListener('change', async (e) => {
-          const id = e.target.getAttribute('data-id')
-          const nuevoEstado = e.target.value
+          const id = e.target.getAttribute('data-id');
+          const nuevoEstado = e.target.value;
 
           const { error } = await supabase
             .from('reportes')
             .update({ estado: nuevoEstado })
-            .eq('id', id)
+            .eq('id', id);
 
           if (error) {
-            alert('Error al actualizar estado: ' + error.message)
+            alert('Error al actualizar estado: ' + error.message);
           } else {
-            alert('Estado actualizado')
+            alert('Estado actualizado');
           }
-        })
-      })
+        });
+      });
     }
 
-    cargarReportes()
+    cargarReportes();
   </script>
 </head>
 <body>
@@ -105,10 +117,8 @@
     <h1>ContraINTEL</h1>
     <p>Panel del Analista</p>
   </header>
-
   <main>
     <button id="logout-btn">Cerrar sesión</button>
-
     <h2>Lista de Reportes</h2>
     <table>
       <thead>
