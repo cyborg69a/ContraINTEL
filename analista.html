@@ -52,7 +52,7 @@
         `
       }
 
-      // Manejadores para botones de descarga
+      // Botones de descarga
       document.querySelectorAll('.descargar-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const ruta = e.target.getAttribute('data-ruta')
@@ -77,11 +77,12 @@
         })
       })
 
-      // Manejadores para cambiar estado
+      // Cambiar estado
       document.querySelectorAll('.estado-select').forEach(select => {
         select.addEventListener('change', async (e) => {
           const id = e.target.getAttribute('data-id')
           const nuevoEstado = e.target.value
+
           const { error } = await supabase
             .from('reportes')
             .update({ estado: nuevoEstado })
