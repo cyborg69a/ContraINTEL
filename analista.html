@@ -8,7 +8,7 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabase = createClient('https://vjiohcqyxasxhdvrywlv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqaW9oY3F5eGFzeGhkdnJ5d2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQ4OTgsImV4cCI6MjA2NTM0MDg5OH0.O8hPp9RO4t6vXRUaf2Jz-Xxvpb0B8m6bsUPczH-nj70')
+    const supabase = createClient('https://TU-PROYECTO.supabase.co', 'TU-CLAVE-ANON')
 
     const tabla = document.getElementById('tabla-reportes')
     const logoutBtn = document.getElementById('logout-btn')
@@ -29,8 +29,7 @@
         return
       }
 
-      const blob = await data.blob()
-      const url = URL.createObjectURL(blob)
+      const url = URL.createObjectURL(data)
       const a = document.createElement('a')
       a.href = url
       a.download = ruta.split('/').pop()
@@ -64,7 +63,9 @@
             </td>
             <td>${new Date(r.fecha_creacion || r.created_at).toLocaleString()}</td>
             <td>
-              ${r.archivo_nombre ? `<button onclick="descargarArchivo('${r.archivo_nombre}')">Descargar</button>` : '—'}
+              ${r.archivo_nombre
+                ? `<button onclick="descargarArchivo('${r.archivo_nombre}')">Descargar</button>`
+                : '—'}
             </td>
           </tr>
         `
