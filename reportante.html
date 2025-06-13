@@ -8,9 +8,11 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabase = createClient('https://vjiohcqyxasxhdvrywlv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqaW9oY3F5eGFzeGhkdnJ5d2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQ4OTgsImV4cCI6MjA2NTM0MDg5OH0.O8hPp9RO4t6vXRUaf2Jz-Xxvpb0B8m6bsUPczH-nj70')
+    // Reemplaza con tus credenciales reales de Supabase
+    const supabase = createClient('https://TU-PROYECTO.supabase.co', 'TU-CLAVE-ANON')
 
-    const user = (await supabase.auth.getUser()).data.user
+    const { data: { user } } = await supabase.auth.getUser()
+
     const form = document.getElementById('reporte-form')
     const tabla = document.getElementById('tabla-reportes')
     const logoutBtn = document.getElementById('logout-btn')
@@ -20,7 +22,6 @@
       window.location.href = 'index.html'
     })
 
-    // Calcular hash SHA-256
     async function calcularHash(file) {
       const arrayBuffer = await file.arrayBuffer()
       const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer)
@@ -35,15 +36,17 @@
       const descripcion = form.descripcion.value
       const severidad = form.severidad.value
       const archivo = document.getElementById('archivo').files[0]
+
       let archivoHash = null
+      let archivoRuta = null
 
       if (archivo) {
         archivoHash = await calcularHash(archivo)
+        archivoRuta = `${user.id}/${archivo.name}`
 
-        const nombreArchivo = `${user.id}/${archivo.name}`
         const { error: uploadError } = await supabase.storage
           .from('reportes')
-          .upload(nombreArchivo, archivo, {
+          .upload(archivoRuta, archivo, {
             cacheControl: '3600',
             upsert: false
           })
@@ -60,7 +63,8 @@
         severidad,
         creado_por: user.id,
         estado: 'Nuevo',
-        archivo_hash: archivoHash
+        archivo_hash: archivoHash,
+        archivo_nombre: archivoRuta
       })
 
       if (error) {
