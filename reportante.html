@@ -9,7 +9,7 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
     // Reemplaza con tus credenciales reales de Supabase
-    const supabase = createClient('https://TU-PROYECTO.supabase.co', 'TU-CLAVE-ANON')
+    const supabase = createClient('https://vjiohcqyxasxhdvrywlv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqaW9oY3F5eGFzeGhkdnJ5d2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NjQ4OTgsImV4cCI6MjA2NTM0MDg5OH0.O8hPp9RO4t6vXRUaf2Jz-Xxvpb0B8m6bsUPczH-nj70')
 
     const { data: { user } } = await supabase.auth.getUser()
 
